@@ -9,3 +9,6 @@ Detects if dopus is running, backs up a specific profile and then resaves it so 
 * Set up dopus to load the specified profile **name** during startup.
 * Set up a scheduled task using windows task scheduler to run this program at regular intervals.
 * Add profile **name** as argument to the scheduled task and choose interval.
+
+##Binaries
+https://github.com/devocalypse/DopusLayoutSaver/releases

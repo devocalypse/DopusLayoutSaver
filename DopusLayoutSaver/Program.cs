@@ -13,10 +13,12 @@ namespace DopusLayoutSaver
         /// The main entry point for the application.
         /// </summary>
         [STAThread]
-        static void Main()
+        static void Main(string[] args)
         {
+            if (args.Length < 1) return;
+
             var dopus = Process.GetProcessesByName("dopus");
-            var layout = "Dev";
+            var layout = args[0];
 
             if (dopus.Any())
             {
@@ -33,9 +35,15 @@ namespace DopusLayoutSaver
                 } 
                 var dopusdir = Path.GetDirectoryName(dopuspath);
                 var layoutFile = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), $@"GPSoftware\Directory Opus\Layouts\{layout}.oll");
-                
+
+                if (!File.Exists(layoutFile))
+                {
+                    MessageBox.Show("Cannot backup layout. No such layout exists: " + layout, "Dopus Session Saver", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    return;
+                }
+
                 //backup
-                File.Copy(layoutFile, $"{layoutFile}.bak-{DateTime.Now:yyyy-MM-dd_hh-mm-ss-tt}");
+                File.Copy(layoutFile, $"{layoutFile}.bak-{DateTime.Now:yyyy-MM-dd_HH-mm-ss}");
                 //save
                 new Process
                 {

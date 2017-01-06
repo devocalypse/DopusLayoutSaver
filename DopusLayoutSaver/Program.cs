@@ -15,10 +15,21 @@ namespace DopusLayoutSaver
         [STAThread]
         static void Main(string[] args)
         {
-            if (args.Length < 1) return;
+            if (args.Length < 1)
+            {
+                MessageBox.Show("Usage arguments:\nDopusLayoutSaver.exe <LayoutName> [<MaxBackupCount>]", "Dopus Session Saver", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                return;
+            }
 
             var dopus = Process.GetProcessesByName("dopus");
             var layout = args[0];
+            int backups;
+            int maxbackups = 10;
+            if (args.Length == 2 && int.TryParse(args[1], out backups))
+            {
+                maxbackups = backups;
+            }
+
 
             if (dopus.Any())
             {
@@ -42,9 +53,10 @@ namespace DopusLayoutSaver
                     return;
                 }
 
-                //backup
+                //backup layout before saving
                 File.Copy(layoutFile, $"{layoutFile}.bak-{DateTime.Now:yyyy-MM-dd_HH-mm-ss}");
-                //save
+
+                //save layout
                 new Process
                 {
                     StartInfo = new ProcessStartInfo()
@@ -54,6 +66,18 @@ namespace DopusLayoutSaver
                         WorkingDirectory = dopusdir
                     }
                 }.Start();
+
+                //purge oldest backups
+                var di = new DirectoryInfo(Path.GetDirectoryName(layoutFile));
+                var files = di.GetFileSystemInfos(layout + ".oll.bak-*");
+                var allentries = files.OrderBy(f => f.CreationTime).ToList();
+
+                if (allentries.Count <= maxbackups) return;
+                allentries.RemoveRange(allentries.Count - maxbackups, maxbackups);
+                foreach (var info in allentries)
+                {
+                    File.Delete(info.FullName);
+                }
             }
 
         }
